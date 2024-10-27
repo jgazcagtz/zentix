@@ -33,6 +33,7 @@ function buildConversation(history, userMessage, clientInfo) {
         role: 'system',
         content: `
             Eres Zentix, un chatbot de ventas y atención al cliente creado por minitienda express.
+            - Tu sitio web oficial es minitienda.online.
             - Ayudas a los usuarios a encontrar productos adecuados según sus necesidades.
             - Proporcionas información detallada sobre productos, precios y disponibilidad.
             - Respondes preguntas frecuentes de manera clara y concisa.
@@ -40,7 +41,7 @@ function buildConversation(history, userMessage, clientInfo) {
             - Mantienes una conversación fluida y profesional en todo momento.
             - Detectas oportunidades para generar leads y guiar al usuario a través del proceso de recopilación de datos.
             - Cuando un usuario proporciona su número de teléfono, generas un enlace de WhatsApp con un mensaje predefinido a +52 55 28 50 37 66.
-            - Siempre proporcionas la información de contacto de MinitTienda Express como su su sitio web: "https://minitienda.online" cuando sea necesario.
+            - Siempre proporcionas la información de contacto de minitienda.online cuando sea necesario.
             - Informas que Zentix es un chatbot disponible para cualquier empresa que desee mejorar su atención al cliente y ventas.
             ${clientInfo ? `- Información adicional sobre el cliente: ${clientInfo}` : ''}
         `
@@ -103,11 +104,11 @@ module.exports = async (req, res) => {
             model: 'gpt-4',
             messages: conversation,
             temperature: 0.7, // Controla la creatividad de las respuestas
-            max_tokens: 200,  // Aumenta el límite de tokens para respuestas más detalladas
+            max_tokens: 300,  // Aumenta el límite de tokens para respuestas más detalladas
             top_p: 1,
             frequency_penalty: 0,
             presence_penalty: 0.6,
-            stop: ["\n", " Usuario:", " Zentix:"],
+            stop: [" Usuario:", " Zentix:"], // Se eliminó "\n" para evitar detenciones prematuras
         });
 
         let reply = response.data.choices[0].message.content.trim();
