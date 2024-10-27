@@ -27,9 +27,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function addMessage(content, sender) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', sender);
-        messageElement.innerText = content;
+        messageElement.innerHTML = makeLinksClickable(content);
         chatMessages.appendChild(messageElement);
         chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    /**
+     * Función para convertir URLs en enlaces clicables
+     * @param {string} text - Texto que puede contener URLs
+     * @returns {string} - Texto con URLs convertidas en enlaces
+     */
+    function makeLinksClickable(text) {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
     }
 
     /**
