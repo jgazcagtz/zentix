@@ -164,8 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const payload = {
                 message,
-                history: conversationHistory,
-                clientInfo: 'minitienda.online es el sitio web oficial de minitienda express, una tienda en línea que ofrece una amplia gama de productos y servicios para mejorar tu negocio.'
+                history: conversationHistory
             };
 
             const response = await fetch('https://zentix.vercel.app/api/chat', { // Asegúrate de que esta URL sea correcta
