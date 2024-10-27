@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatMessages = document.getElementById('chat-messages');
     const userInput = document.getElementById('user-input');
 
-    // URL de la Web App de Google Sheets (reemplaza con tu URL)
-    const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzJzjMUfhTLQ5JakBmRq3j8SwgTrMFnCWdd1N4q03ihoZ6AgGHCIOjA00oAhwYnYYX5/exec';
+    // URL del Backend para enviar Leads
+    const GOOGLE_SHEETS_URL = '/api/leads'; // Cambio aquí
 
     // Historial de la conversación
     let conversationHistory = [];
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return loadingElement;
     }
 
-    // Función para enviar datos de lead a Google Sheets
+    // Función para enviar datos de lead a Google Sheets a través del backend
     async function sendLeadToGoogleSheets(lead) {
         try {
             const response = await fetch(GOOGLE_SHEETS_URL, {
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             leadData.phone = message;
             conversationState = 'normal';
             addMessage('¡Gracias por proporcionar tu información! Un representante se pondrá en contacto contigo pronto.', 'bot');
-            // Enviar los datos a Google Sheets
+            // Enviar los datos a Google Sheets a través del backend
             await sendLeadToGoogleSheets(leadData);
             // Resetear los datos de lead
             leadData = { name: '', email: '', phone: '' };
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const loadingMessage = showLoading();
 
         try {
-            const response = await fetch('https://zentix.vercel.app/api/chat', {
+            const response = await fetch('https://zentix.vercel.app/api/chat', { // Asegúrate de que esta URL sea correcta
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
