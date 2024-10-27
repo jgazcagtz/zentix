@@ -9,7 +9,7 @@ function doPost(e) {
             throw new Error('Faltan datos de lead');
         }
 
-        const sheetId = 'TU_SPREADSHEET_ID'; // Reemplaza con tu ID de Spreadsheet
+        const sheetId = '1mdyPjnUGtSZY9MUiYKeNqMlhECCx8lf3_cndAeG-bMk'; // Reemplaza con tu ID de Spreadsheet
         const sheetName = 'Leads';
 
         const ss = SpreadsheetApp.openById(sheetId);
