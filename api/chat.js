@@ -31,22 +31,28 @@ function buildConversation(history, userMessage) {
             - Detectas oportunidades para generar leads y guiar al usuario a través del proceso de recopilación de datos.
             - Cuando un usuario proporciona su número de teléfono, generas un enlace de WhatsApp con un mensaje predefinido a +52 55 28 50 37 66.
             - Siempre proporcionas la información de contacto de minitienda.online cuando sea necesario.
+            - Además, informas que Zentix es un chatbot disponible para cualquier empresa que desee mejorar su atención al cliente y ventas.
         `
     };
 
-    // Combinar el mensaje de sistema con el historial y el mensaje actual del usuario
-    return [
-        systemMessage,
-        ...history,
-        { role: 'user', content: userMessage }
-    ];
+    // Evitar agregar múltiples mensajes de sistema al historial
+    if (history.length === 0) {
+        return [systemMessage, { role: 'user', content: userMessage }];
+    } else {
+        return [...history, { role: 'user', content: userMessage }];
+    }
 }
 
 // Función para detectar si un mensaje contiene un número de teléfono
-function containsPhoneNumber(message) {
-    // Expresión regular para detectar números de teléfono (ajusta según tus necesidades)
+function extractPhoneNumber(message) {
+    // Expresión regular para detectar números de teléfono en diferentes formatos
     const phoneRegex = /(\+?\d{1,3}[-.\s]?)?(\d{3}[-.\s]?){2}\d{4}/;
-    return phoneRegex.test(message);
+    const match = message.match(phoneRegex);
+    if (match) {
+        // Retornar el número limpio (solo dígitos)
+        return match[0].replace(/[-.\s]/g, '');
+    }
+    return null;
 }
 
 // Función para generar el enlace de WhatsApp
@@ -88,15 +94,11 @@ module.exports = async (req, res) => {
         let reply = response.data.choices[0].message.content.trim();
 
         // Verificar si el mensaje del usuario contiene un número de teléfono
-        if (containsPhoneNumber(sanitizedMessage)) {
-            // Extraer el número de teléfono usando la expresión regular
-            const phoneMatch = sanitizedMessage.match(/(\+?\d{1,3}[-.\s]?)?(\d{3}[-.\s]?){2}\d{4}/);
-            if (phoneMatch) {
-                const phoneNumber = phoneMatch[0].replace(/[-.\s]/g, ''); // Limpiar el número
-                const whatsappLink = generateWhatsAppLink(phoneNumber);
-                // Agregar el enlace de WhatsApp a la respuesta del bot
-                reply += `\nPuedes contactarnos directamente a través de WhatsApp haciendo clic en el siguiente enlace: ${whatsappLink}`;
-            }
+        const phoneNumber = extractPhoneNumber(sanitizedMessage);
+        if (phoneNumber) {
+            const whatsappLink = generateWhatsAppLink(phoneNumber);
+            // Agregar el enlace de WhatsApp a la respuesta del bot en formato de enlace Markdown
+            reply += `\nPuedes contactarnos directamente a través de WhatsApp haciendo clic en el siguiente enlace: [WhatsApp](https://wa.me/${phoneNumber}?text=${encodeURIComponent('Hola, me gustaría obtener más información sobre sus productos.')})`;
         }
 
         res.status(200).json({ reply });
