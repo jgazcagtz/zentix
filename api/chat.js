@@ -24,10 +24,9 @@ function sanitizeMessage(message) {
  * Función para construir el historial de la conversación
  * @param {Array} history - Historial de la conversación
  * @param {string} userMessage - Mensaje actual del usuario
- * @param {string} clientInfo - Información adicional del cliente (opcional)
  * @returns {Array} - Conversación completa para enviar a OpenAI
  */
-function buildConversation(history, userMessage, clientInfo) {
+function buildConversation(history, userMessage) {
     // Mensaje de sistema para establecer el contexto del bot
     const systemMessage = {
         role: 'system',
@@ -46,7 +45,6 @@ function buildConversation(history, userMessage, clientInfo) {
             - Informas que Zentix es un chatbot disponible para cualquier empresa que desee mejorar su atención al cliente y ventas.
             - Si un usuario pregunta por tu nombre, debes responder que te llamas Zentix.
             - Si un usuario pregunta por tu función, debes describir que eres un chatbot de atención al cliente y ventas.
-            ${clientInfo ? `- Información adicional sobre el cliente: ${clientInfo}` : ''}
         `
     };
 
@@ -120,7 +118,7 @@ module.exports = async (req, res) => {
         return res.status(405).json({ error: 'Método no permitido' });
     }
 
-    const { message, history, clientInfo } = req.body;
+    const { message, history } = req.body;
 
     if (!message) {
         return res.status(400).json({ error: 'Mensaje vacío' });
@@ -131,7 +129,7 @@ module.exports = async (req, res) => {
 
     try {
         // Construir la conversación completa
-        const conversation = buildConversation(history || [], sanitizedMessage, clientInfo);
+        const conversation = buildConversation(history || [], sanitizedMessage);
 
         // Llamada a la API de OpenAI con reintentos
         const response = await callOpenAI(conversation);
