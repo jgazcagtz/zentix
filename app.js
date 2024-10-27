@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // URL de la Web App de Google Sheets (reemplaza con tu URL)
     const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzJzjMUfhTLQ5JakBmRq3j8SwgTrMFnCWdd1N4q03ihoZ6AgGHCIOjA00oAhwYnYYX5/exec';
 
+    // Historial de la conversación
+    let conversationHistory = [];
+
     // Estado de la conversación
     let conversationState = 'normal'; // Puede ser 'normal', 'collecting_name', 'collecting_email', 'collecting_phone'
     let leadData = {
@@ -149,23 +152,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ message })
+                body: JSON.stringify({ message, history: conversationHistory })
             });
 
             const data = await response.json();
             chatMessages.removeChild(loadingMessage);
             addMessage(data.reply, 'bot');
 
+            // Añadir la respuesta del bot al historial
+            conversationHistory.push({ role: 'assistant', content: data.reply });
+
             // Detectar si el bot quiere recolectar información de lead
-            const leadCollectionKeywords = ['contacto', 'interesado', 'información', 'datos', 'leads'];
-            const userIntent = message.toLowerCase();
             const botIntent = data.reply.toLowerCase();
 
-            // Aquí puedes personalizar cómo detectar si el bot está solicitando información de lead
+            // Personalizar las condiciones de detección según tus necesidades
             if (botIntent.includes('para ayudarte mejor') || botIntent.includes('necesitamos algunos datos')) {
                 conversationState = 'collecting_name';
                 addMessage('¡Genial! Para ayudarte mejor, por favor proporciona tu nombre.', 'bot');
             }
+
+            // Añadir al historial la interacción del usuario
+            conversationHistory.push({ role: 'user', content: message });
 
         } catch (error) {
             chatMessages.removeChild(loadingMessage);
