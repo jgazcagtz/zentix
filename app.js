@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const loadingMessage = showLoading();
 
         try {
-            const response = await fetch('/api/chat', {
+            const response = await fetch('https://zentix.vercel.app/api/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
