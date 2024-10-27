@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInput = document.getElementById('user-input');
 
     // URL del Backend para enviar Leads
-    const GOOGLE_SHEETS_URL = '/api/leads'; // Cambio aquí
+    const GOOGLE_SHEETS_URL = '/api/leads'; // Asegúrate de que esta ruta sea correcta
 
     // Historial de la conversación
     let conversationHistory = [];
@@ -19,7 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
         phone: ''
     };
 
-    // Función para agregar mensajes al chat
+    /**
+     * Función para agregar mensajes al chat
+     * @param {string} content - Contenido del mensaje
+     * @param {string} sender - 'user' o 'bot'
+     */
     function addMessage(content, sender) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', sender);
@@ -28,7 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // Función para mostrar un mensaje de carga
+    /**
+     * Función para mostrar un mensaje de carga
+     * @returns {HTMLElement} - Elemento de carga
+     */
     function showLoading() {
         const loadingElement = document.createElement('div');
         loadingElement.classList.add('message', 'bot', 'loading');
@@ -71,7 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return loadingElement;
     }
 
-    // Función para enviar datos de lead a Google Sheets a través del backend
+    /**
+     * Función para enviar datos de lead a Google Sheets a través del backend
+     * @param {Object} lead - Datos del lead
+     */
     async function sendLeadToGoogleSheets(lead) {
         try {
             const response = await fetch(GOOGLE_SHEETS_URL, {
@@ -95,7 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Función para manejar la recolección de información de leads
+    /**
+     * Función para manejar la recolección de información de leads
+     * @param {string} message - Mensaje del usuario
+     */
     async function handleLeadCollection(message) {
         if (conversationState === 'collecting_name') {
             leadData.name = message;
@@ -127,7 +140,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Manejar el envío del formulario
+    /**
+     * Manejar el envío del formulario
+     */
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const message = userInput.value.trim();
@@ -147,37 +162,48 @@ document.addEventListener('DOMContentLoaded', () => {
         const loadingMessage = showLoading();
 
         try {
+            const payload = {
+                message,
+                history: conversationHistory,
+                clientInfo: 'minitienda.online es el sitio web oficial de minitienda express, una tienda en línea que ofrece una amplia gama de productos y servicios para mejorar tu negocio.'
+            };
+
             const response = await fetch('https://zentix.vercel.app/api/chat', { // Asegúrate de que esta URL sea correcta
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ message, history: conversationHistory })
+                body: JSON.stringify(payload)
             });
 
             const data = await response.json();
             chatMessages.removeChild(loadingMessage);
-            addMessage(data.reply, 'bot');
 
-            // Añadir la respuesta del bot al historial
-            conversationHistory.push({ role: 'assistant', content: data.reply });
+            if (data.reply) {
+                addMessage(data.reply, 'bot');
+                // Añadir la respuesta del bot al historial
+                conversationHistory.push({ role: 'assistant', content: data.reply });
 
-            // Detectar si el bot quiere recolectar información de lead
-            const botIntent = data.reply.toLowerCase();
+                // Detectar si el bot quiere recolectar información de lead
+                const botIntent = data.reply.toLowerCase();
 
-            // Personalizar las condiciones de detección según tus necesidades
-            if (botIntent.includes('para ayudarte mejor') || botIntent.includes('necesitamos algunos datos')) {
-                conversationState = 'collecting_name';
-                addMessage('¡Genial! Para ayudarte mejor, por favor proporciona tu nombre.', 'bot');
+                // Personalizar las condiciones de detección según tus necesidades
+                if (botIntent.includes('para ayudarte mejor') || botIntent.includes('necesitamos algunos datos')) {
+                    conversationState = 'collecting_name';
+                    addMessage('¡Genial! Para ayudarte mejor, por favor proporciona tu nombre.', 'bot');
+                }
+            } else if (data.error) {
+                addMessage('Lo siento, hubo un error al procesar tu solicitud. Inténtalo de nuevo más tarde.', 'bot');
+                console.error('Error del backend:', data.error);
             }
 
-            // Añadir al historial la interacción del usuario
+            // Añadir la interacción del usuario al historial
             conversationHistory.push({ role: 'user', content: message });
 
         } catch (error) {
             chatMessages.removeChild(loadingMessage);
             addMessage('Lo siento, hubo un error. Inténtalo de nuevo.', 'bot');
-            console.error(error);
+            console.error('Error:', error);
         }
     });
 });
