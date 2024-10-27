@@ -12,7 +12,7 @@ const openai = new OpenAIApi(configuration);
 
 // Función para limpiar y sanitizar el mensaje del usuario
 function sanitizeMessage(message) {
-    // Aquí puedes agregar más reglas de sanitización según tus necesidades
+    // Puedes agregar más reglas de sanitización según tus necesidades
     return message.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
@@ -22,13 +22,15 @@ function buildConversation(history, userMessage) {
     const systemMessage = {
         role: 'system',
         content: `
-            Eres Zentix, un chatbot de ventas y atención al cliente altamente experto.
+            Eres Zentix, un chatbot de ventas y atención al cliente creado por minitienda express.
             - Ayudas a los usuarios a encontrar productos adecuados según sus necesidades.
             - Proporcionas información detallada sobre productos, precios y disponibilidad.
             - Respondes preguntas frecuentes de manera clara y concisa.
             - Recopilas información de leads de forma amigable y eficiente.
             - Mantienes una conversación fluida y profesional en todo momento.
             - Detectas oportunidades para generar leads y guiar al usuario a través del proceso de recopilación de datos.
+            - Cuando un usuario proporciona su número de teléfono, generas un enlace de WhatsApp con un mensaje predefinido a +52 55 28 50 37 66.
+            - Siempre proporcionas la información de contacto de minitienda.online cuando sea necesario.
         `
     };
 
@@ -38,6 +40,19 @@ function buildConversation(history, userMessage) {
         ...history,
         { role: 'user', content: userMessage }
     ];
+}
+
+// Función para detectar si un mensaje contiene un número de teléfono
+function containsPhoneNumber(message) {
+    // Expresión regular para detectar números de teléfono (ajusta según tus necesidades)
+    const phoneRegex = /(\+?\d{1,3}[-.\s]?)?(\d{3}[-.\s]?){2}\d{4}/;
+    return phoneRegex.test(message);
+}
+
+// Función para generar el enlace de WhatsApp
+function generateWhatsAppLink(phoneNumber) {
+    const prefilledMessage = encodeURIComponent('Hola, me gustaría obtener más información sobre sus productos.');
+    return `https://wa.me/${phoneNumber}?text=${prefilledMessage}`;
 }
 
 module.exports = async (req, res) => {
@@ -70,7 +85,19 @@ module.exports = async (req, res) => {
             stop: ["\n", " Usuario:", " Zentix:"],
         });
 
-        const reply = response.data.choices[0].message.content.trim();
+        let reply = response.data.choices[0].message.content.trim();
+
+        // Verificar si el mensaje del usuario contiene un número de teléfono
+        if (containsPhoneNumber(sanitizedMessage)) {
+            // Extraer el número de teléfono usando la expresión regular
+            const phoneMatch = sanitizedMessage.match(/(\+?\d{1,3}[-.\s]?)?(\d{3}[-.\s]?){2}\d{4}/);
+            if (phoneMatch) {
+                const phoneNumber = phoneMatch[0].replace(/[-.\s]/g, ''); // Limpiar el número
+                const whatsappLink = generateWhatsAppLink(phoneNumber);
+                // Agregar el enlace de WhatsApp a la respuesta del bot
+                reply += `\nPuedes contactarnos directamente a través de WhatsApp haciendo clic en el siguiente enlace: ${whatsappLink}`;
+            }
+        }
 
         res.status(200).json({ reply });
     } catch (error) {
