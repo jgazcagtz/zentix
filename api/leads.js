@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
     }
 
     try {
-        const sheetUrl = 'https://script.google.com/macros/s/AKfycbzJzjMUfhTLQ5JakBmRq3j8SwgTrMFnCWdd1N4q03ihoZ6AgGHCIOjA00oAhwYnYYX5/exec'; // Reemplaza con tu URL de Web App
+        const sheetUrl = 'https://script.google.com/macros/s/AKfycbxdJfsrnIJl05OrJh5cewnQpMWjZdJ8kqzBeYoMfc9gC0yCsZVe1GQ-d7UscvKA8TeQ/exec'; // Reemplaza con tu URL de Web App
 
         const response = await fetch(sheetUrl, {
             method: 'POST',
