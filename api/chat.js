@@ -109,7 +109,7 @@ async function callOpenAI(conversation, retries = 3) {
             if (attempt === retries) {
                 throw error;
             }
-            // Esperar antes de reintentar
+            // Esperar antes de reintentar (exponencial)
             await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
         }
     }
