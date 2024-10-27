@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInput = document.getElementById('user-input');
 
     // URL de la Web App de Google Sheets (reemplaza con tu URL)
-    const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/TU_SCRIPT_ID/exec';
+    const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzJzjMUfhTLQ5JakBmRq3j8SwgTrMFnCWdd1N4q03ihoZ6AgGHCIOjA00oAhwYnYYX5/exec';
 
     // Estado de la conversación
     let conversationState = 'normal'; // Puede ser 'normal', 'collecting_name', 'collecting_email', 'collecting_phone'
